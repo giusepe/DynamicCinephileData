@@ -70,6 +70,7 @@ namespace Cinephile.ViewModels
                 movieService
                     .UpcomingMovies
                     .Connect()
+                    //.Page()
                     .DisposeMany()
                     .ObserveOn(this.mainThreadScheduler)
                     .Do(movie => Debug.WriteLine($"Adding Movie Items"))

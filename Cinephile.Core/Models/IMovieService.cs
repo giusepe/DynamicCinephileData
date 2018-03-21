@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
+using DynamicData;
 
 namespace Cinephile.Core.Model
 {
     public interface IMovieService
     {
-        void LoadUpcomingMovies(int index);
+        IObservable<IChangeSet<Movie, int>> LoadUpcomingMovies(int index);
     }
 }

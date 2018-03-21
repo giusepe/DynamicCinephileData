@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Cinephile.Core.Rest;
 using Cinephile.Core.Rest.Dtos.Movies;
@@ -35,12 +34,13 @@ namespace Cinephile.Core.Model
             movieApiService = apiService ?? Locator.Current.GetService<IApiService>();
             movieCache = cache ?? Locator.Current.GetService<ICache>();
 
-            UpcomingMovies = new SourceCache<Movie, int>(t => t.Id);
+            UpcomingMovies = LoadUpcomingMovies(-1)
+                .AsObservableCache();
         }
 
-        public void LoadUpcomingMovies(int index)
+        public IObservable<IChangeSet<Movie, int>> LoadUpcomingMovies(int index)
         {
-            UpcomingMovies = ObservableChangeSet.Create<Movie, int>(cache =>
+            return ObservableChangeSet.Create<Movie, int>(cache =>
             {
                 var disposable = movieCache
                     .GetAndFetchLatest($"upcoming_movies_{index}", () => FetchUpcomingMovies(index))
@@ -51,7 +51,7 @@ namespace Cinephile.Core.Model
                 return disposable;
 
             }, movie => movie.Id)
-            .AsObservableCache();
+            .DeferUntilLoaded();
         }
 
         IObservable<IEnumerable<Movie>> FetchUpcomingMovies(int index)
